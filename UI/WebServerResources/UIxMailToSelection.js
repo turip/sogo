@@ -29,7 +29,12 @@
  * surrounding context to check.
  */
 
-var lastIndex = currentIndex;
+var lastIndex = -1;
+
+function mailToLastIndex()
+{
+	return lastIndex;
+}
 
 function sanitizedCn(cn) {
     var parts;
@@ -47,10 +52,32 @@ function hasAddress(email) {
 }
 
 function checkAddresses() {
-    alert("addressCount: " + this.getAddressCount() + " currentIndex: " + currentIndex + " lastIndex: " + lastIndex);
+    alert("addressCount: " + this.getAddressCount() + " lastIndex: " + lastIndex);
 }
 
-function fancyAddRow(text, type) {
+function fancyRemoveRow(id)
+{
+	var counter = id;
+	var currentRow = $('row_' + counter);
+	currentRow.remove();
+	counter++;
+	currentRow = $('row_'+counter);
+	while (currentRow)
+	{
+		currentRow.setAttribute("id", "row_"+(counter-1));
+		var addr = $('addr_'+counter);
+		var popup = $('popup_'+counter);
+		addr.setAttribute("id", "addr_"+(counter-1));
+		addr.setAttribute("name", "addr_"+(counter-1));
+		popup.setAttribute("name", "popup_"+(counter-1));
+		popup.setAttribute("id", "popup_"+(counter-1));
+		counter++;
+		currentRow = $('row_' + counter);
+	}
+	lastIndex--;
+}
+
+function fancyAddRow(text, type, focus) {
     var addr = $('addr_' + lastIndex);
     if (addr && addr.value == '') {
         var sub = $('subjectField');
@@ -63,14 +90,22 @@ function fancyAddRow(text, type) {
     var addressList = $("addressList").tBodies[0];
     var lastChild = $("lastRow");
   
-    currentIndex++;
+    lastIndex++;
     var proto = lastChild.previous("tr");
     var row = proto.cloneNode(true);
-    row.writeAttribute("id", 'row_' + currentIndex);
+    row.writeAttribute("id", 'row_' + lastIndex);
     var rowNodes = row.childNodesWithTag("td");
     var select = $(rowNodes[0]).childNodesWithTag("select")[0];
-    select.name = 'popup_' + currentIndex;
-    select.value = (type? type : proto.down("select").value);
+    select.name = 'popup_' + lastIndex;
+    select.id = 'popup_' + lastIndex;
+    if (proto.down("select").value != 3) // Only one reply to is preferred
+    {
+	    select.value = (type? type : proto.down("select").value);
+    }
+    else
+    {
+	    select.value = (type? type : 0); // Force to
+    }
     var cell = $(rowNodes[1]);
     var input = cell.childNodesWithTag("input")[0];
     if (Prototype.Browser.IE) {
@@ -79,8 +114,8 @@ function fancyAddRow(text, type) {
         cell.appendChild(input);
     }
     
-    input.name  = 'addr_' + currentIndex;
-    input.id = 'addr_' + currentIndex;
+    input.name  = 'addr_' + lastIndex;
+    input.id = 'addr_' + lastIndex;
     input.value = text;
     input.stopObserving();
     input.addInterface(SOGoAutoCompletionInterface);
@@ -89,7 +124,11 @@ function fancyAddRow(text, type) {
     input.observe("blur", addressFieldLostFocus.bind(input));
     input.observe("autocompletion:changedlist", expandContactList);
     input.on("autocompletion:changed", addressFieldChanged.bind(input));
-    input.focus();
+    if (focus)
+    {
+	    input.focus();  // It's a bad idea as on adding from selecting new item from from field, this will trigger cleanup
+	    // But when the user adds manualy a new item it must be updated
+    }
 
     return input;
 }
@@ -122,7 +161,7 @@ function expandContactListCallback (http) {
                     var text = data[i][2];
                     if (data[i][1].length)
                       text = data[i][1] + " <" + data[i][2] + ">";
-                    fancyAddRow(text, $(input).up("tr").down("select").value);
+                    fancyAddRow(text, $(input).up("tr").down("select").value, true);
                 }
             }
         }
@@ -172,7 +211,7 @@ function addressFieldChanged(event) {
                             first = false;
                         }
                         else
-                            fancyAddRow(phrase.join(' '), $(this).up("tr").down("select").value);
+                            fancyAddRow(phrase.join(' '), $(this).up("tr").down("select").value, true);
                     
                         phrase = new Array();
                     }
@@ -189,7 +228,7 @@ function addressFieldChanged(event) {
                         first = false;
                     }
                     else
-                        fancyAddRow(word, $(this).up("tr").down("select").value);
+                        fancyAddRow(word, $(this).up("tr").down("select").value, true);
                 }
                 
                 phrase = new Array();
@@ -216,11 +255,12 @@ function removeLastEditedRowIfEmpty() {
     addressList = $("addressList").tBodies[0];
   
     if (lastIndex == 0 && addressList.childNodes.length <= 2) return;
-    addr = $('addr_' + lastIndex);
+	    addr = $('addr_' + lastIndex);
     if (!addr) return;
     if (addr.value.strip() != '') return;
     senderRow = $("row_" + lastIndex);
     addressList.removeChild(senderRow);
+    lastIndex--;
 }
 
 function getIndexFromIdentifier(id) {
@@ -277,7 +317,7 @@ function hasRecipients() {
 }
 
 function initMailToSelection() {
-    currentIndex = lastIndex = $$("table#addressList tr").length - 2;
+    lastIndex = $$("table#addressList tr").length - 2;
 }
 
 document.observe("dom:loaded", initMailToSelection);

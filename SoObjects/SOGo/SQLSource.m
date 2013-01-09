@@ -878,4 +878,12 @@
                                userInfo: nil];
 }
 
+
+// TODO!
+- (NSArray *) lookupExtIdentitiesFor: (NSString *) login 
+{
+	NSLog(@"Should not call lookupExtIdentitiesFor on SQL Source as its not implemented!");
+	return nil;
+}
+
 @end

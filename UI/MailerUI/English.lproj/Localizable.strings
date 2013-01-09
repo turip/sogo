@@ -106,6 +106,7 @@
 "to"            = "To";
 "cc"            = "Cc";
 "bcc"           = "Bcc";
+"replyTo"	= "Reply to";
 
 "Edit Draft..." = "Edit Draft...";
 "Load Images" = "Load Images";

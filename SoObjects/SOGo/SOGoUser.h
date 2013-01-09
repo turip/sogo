@@ -115,6 +115,7 @@
 - (NSArray *) allIdentities;
 - (NSDictionary *) primaryIdentity;
 - (NSMutableDictionary *) defaultIdentity;
+- (BOOL) hasExtendedIdentities;
 
 - (BOOL) isSuperUser;
 - (BOOL) canAuthenticate;

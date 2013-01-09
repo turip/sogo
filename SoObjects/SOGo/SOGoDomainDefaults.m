@@ -146,6 +146,15 @@
   return [self boolForKey: @"SOGoIMAPAclConformsToIMAPExt"];
 }
 
+- (BOOL) extendedIdentities
+{
+  return [self boolForKey: @"SOGoMailExtendedIdentities"];
+}
+
+- (NSDictionary *) extendedLDAPIdentitySettings
+{
+  return [self dictionaryForKey: @"SOGoMailExtendedLDAPIdentitySettings"]; 
+}
 - (BOOL) aclSendEMailNotifications
 {
   return [self boolForKey: @"SOGoACLsSendEMailNotifications"];

@@ -72,4 +72,19 @@
     SOGoRemindWithASound = YES;
 
     SOGoSearchMinimumWordLength = 2;
+
+    SOGoMailExtendedIdentities = NO;
+    SOGoMailExtendedLDAPIdentitySettings  = {
+	baseDN = "uid=%U,ou=people,dc=caesar,dc=elte,dc=hu";
+	filter = "(objectClass=mailIdentity)";
+	identityBCC = "identityBCC";
+	identityCC = "identityCC";
+	identityConfirmed = "identityConfirmed";
+	identityFromAddress = "identityFromAddress";
+	identityFromName = "identityFromName";
+	identityReplyTo = "identityReplyTo";
+	identitySignature = "identitySignature";
+	identityWeight = "identityWeight";
+	};
+
 }

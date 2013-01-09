@@ -701,24 +701,34 @@
       identity = [NSMutableDictionary new];
       fullName = [self cn];
       if (![fullName length])
-        fullName = login;
+	fullName = login;
       [identity setObject: fullName forKey: @"fullName"];
       [identity setObject: [mails objectAtIndex: count] forKey: @"email"];
 
       if ([replyTo length] > 0)
-        [identity setObject: replyTo forKey: @"replyTo"];
+	[identity setObject: replyTo forKey: @"replyTo"];
 
       signature = [_defaults mailSignature];
       if (signature)
-        [identity setObject: signature forKey: @"signature"];
+	[identity setObject: signature forKey: @"signature"];
       [identities addObject: identity];
       [identity release];
     }
   [[identities objectAtIndex: 0] setObject: [NSNumber numberWithBool: YES]
-                                    forKey: @"isDefault"];
+				    forKey: @"isDefault"];
   
   [mailAccount setObject: identities forKey: @"identities"];
   [identities release];
+
+    /** Extended identity support */
+    if ([[self domainDefaults ] extendedIdentities])
+    {
+    	NSArray * a= [[self authenticationSource] lookupExtIdentitiesFor: [self loginInDomain]];
+	if (a != nil)
+	{
+		[mailAccount setObject: a forKey: @"identities"];
+	}
+    }
 
   /* receipts */
   if ([_defaults allowUserReceipt])
@@ -757,6 +767,20 @@
   [mailAccount release];
 }
 
+- (BOOL) hasExtendedIdentities
+{
+    /** Extended identity support */
+    if ([[self domainDefaults ] extendedIdentities])
+    {
+    	NSArray * a= [[self authenticationSource] lookupExtIdentitiesFor: [self loginInDomain]];
+	if (a != nil)
+	{
+		return YES;
+	}
+    }
+    return NO;
+
+}
 - (NSArray *) mailAccounts
 {
   NSArray *auxAccounts;
@@ -928,5 +952,6 @@
 
   return [accessValue boolValue];
 }
+
 
 @end /* SOGoUser */

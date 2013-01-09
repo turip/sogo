@@ -106,6 +106,7 @@
 "to"            = "Címzett";
 "cc"            = "Másolat";
 "bcc"           = "Titkos másolat";
+"replyTo"	= "Válaszcím";
 
 "Edit Draft..." = "Piszkozat szerkesztése...";
 "Load Images" = "Képek betöltése";

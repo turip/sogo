@@ -1566,6 +1566,16 @@
   return [accounts jsonRepresentation];
 }
 
+- (BOOL) hasExtendedIdentities
+{
+	return [user hasExtendedIdentities];
+}
+
+- (NSArray *) userIdentityList
+{
+	return [user allIdentities];
+}
+
 - (NSString *) mailCustomFromEnabled
 {
   return (mailCustomFromEnabled ? @"true" : @"false");

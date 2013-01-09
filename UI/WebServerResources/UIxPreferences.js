@@ -460,26 +460,29 @@ function initMailAccounts() {
         }
     }
 
-    var inputs = $$("#accountInfo input");
-    for (var i = 0; i < inputs.length; i++) {
-        $(inputs[i]).observe("change", onMailAccountInfoChange);
-    }
+	    var inputs = $$("#accountInfo input");
+	    for (var i = 0; i < inputs.length; i++) {
+		$(inputs[i]).observe("change", onMailAccountInfoChange);
+	    }
 
-    inputs = $$("#identityInfo input");
-    for (var i = 0; i < inputs.length; i++) {
-        $(inputs[i]).observe("change", onMailIdentityInfoChange);
-    }
-    $("actSignature").observe("click", onMailIdentitySignatureClick);
-    displayMailAccount(mailAccounts[0], true);
+	    inputs = $$("#identityInfo input");
+	    for (var i = 0; i < inputs.length; i++) {
+		$(inputs[i]).observe("change", onMailIdentityInfoChange);
+	    }
+	    if (!hasExtendedIdentities)
+	    {
+		    $("actSignature").observe("click", onMailIdentitySignatureClick);
+	    }
+	    displayMailAccount(mailAccounts[0], true);
 
-    inputs = $$("#returnReceiptsInfo input");
-    for (var i = 0; i < inputs.length; i++) {
-        $(inputs[i]).observe("change", onMailReceiptInfoChange);
-    }
-    inputs = $$("#returnReceiptsInfo select");
-    for (var i = 0; i < inputs.length; i++) {
-        $(inputs[i]).observe("change", onMailReceiptActionChange);
-    }
+	    inputs = $$("#returnReceiptsInfo input");
+	    for (var i = 0; i < inputs.length; i++) {
+		$(inputs[i]).observe("change", onMailReceiptInfoChange);
+	    }
+	    inputs = $$("#returnReceiptsInfo select");
+	    for (var i = 0; i < inputs.length; i++) {
+		$(inputs[i]).observe("change", onMailReceiptActionChange);
+	    }
 }
 
 function onMailAccountInfoChange(event) {
@@ -687,11 +690,15 @@ function displayMailAccount(mailAccount, readOnly) {
     var identity = (mailAccount["identities"]
                     ? mailAccount["identities"][0]
                     : {} );
-    $("fullName").value = identity["fullName"] || "";
-    $("email").value = identity["email"] || "";
-    $("replyTo").value = identity["replyTo"] || "";
 
-    displayAccountSignature(mailAccount);
+    if (!hasExtendedIdentities)
+    {
+	    $("fullName").value = identity["fullName"] || "";
+	    $("email").value = identity["email"] || "";
+	    $("replyTo").value = identity["replyTo"] || "";
+
+	    displayAccountSignature(mailAccount);
+    }
 
     var receiptAction = "ignore";
     var receiptActionValues = [ "ignore", "allow" ];

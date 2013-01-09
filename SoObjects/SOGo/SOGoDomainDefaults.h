@@ -63,6 +63,7 @@
 - (BOOL) aclSendEMailNotifications;
 - (BOOL) appointmentSendEMailNotifications;
 - (BOOL) foldersSendEMailNotifications;
+- (BOOL) extendedIdentities;
 - (NSArray *) calendarDefaultRoles;
 - (NSArray *) contactsDefaultRoles;
 - (NSArray *) mailPollingIntervals;
@@ -81,6 +82,7 @@
 - (int) searchMinimumWordLength;
 - (BOOL) notifyOnPersonalModifications;
 - (BOOL) notifyOnExternalModifications;
+- (NSDictionary *) extendedLDAPIdentitySettings;
 
 @end
 

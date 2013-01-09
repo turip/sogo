@@ -17,6 +17,7 @@
     var sourceUID = <var:string value="sourceUID"/>;
     var sourceFolder = '<var:string value="sourceFolder" const:escapeHTML="NO"/>';
     var localeCode = '<var:string value="localeCode"/>';
+    var userIdentities = eval('<var:string value="userIdentities" const:escapeHTML="NO"/>');
   </script>
   <div class="popupMenu" id="contactsMenu">
     <ul><!-- space --></ul>
@@ -124,7 +125,7 @@
 	/><br />
       <div>
 	<var:component className="UIxMailToSelection"
-	  to="to" cc="cc" bcc="bcc" />
+	  to="to" cc="cc" bcc="bcc" replyTo="replyTo"/>
       </div>
       <div class="addressListElement" id="subjectRow"
 	><span class="headerField"><var:string label:value="Subject"

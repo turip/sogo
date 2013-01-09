@@ -35,6 +35,8 @@ function addContact(tag, fullContactName, contactId, contactName, contactEmail) 
             neededOptionValue = 1;
         else if (tag == "bcc")
             neededOptionValue = 2;
+	else if (tag == "replyTo")
+	    neededOptionValue = 3;
 
         var stop = false;
         var counter = 0;
@@ -51,14 +53,57 @@ function addContact(tag, fullContactName, contactId, contactName, contactEmail) 
 
         if (!stop) {
             fancyAddRow("");
-            var row = $("row_" + currentIndex);
+            var row = $("row_" + mailToLastIndex());
             var td = $(row.childNodesWithTag("td")[0]);
             var select = $(td.childNodesWithTag("select")[0]);
             select.value = neededOptionValue;
-            insertContact($("addr_" + currentIndex), contactName, contactEmail);
+            insertContact($("addr_" + mailToLastIndex()), contactName, contactEmail);
             onWindowResize(null);
         }
     }
+}
+
+function removeContact(tag, fullContactName, contactId, contactName, contactEmail)
+{
+	var neededOptionValue;
+        if (tag == "cc")
+            neededOptionValue = 1;
+        else if (tag == "bcc")
+            neededOptionValue = 2;
+	else if (tag == "replyTo")
+	    neededOptionValue = 3;
+	else
+	    console.log("Invalid tag name: ", tag);
+
+
+        var stop = false;
+        var counter = 0;
+        var currentRow = $('row_' + counter);
+	var removeRow = undefined;
+        while (currentRow && !stop) {
+            var currentFlag = $(currentRow.childNodesWithTag("td")[0]).childNodesWithTag("select")[0].value;
+            var currentAddressRaw = $(currentRow.childNodesWithTag("td")[1]).childNodesWithTag("input")[0].value;
+	    var currentAddress = parseMailAddress(currentAddressRaw);
+	    if (
+	    	(currentAddress != undefined) && 
+		(currentAddress.mail == contactEmail) &&
+		(currentFlag == neededOptionValue)
+		)
+	    {
+	    	removeRow = counter;
+		stop = true;
+	    }
+            counter++;
+            currentRow = $('row_' + counter);
+        }
+
+	if (removeRow !== undefined)
+	{
+		counter = removeRow;
+		fancyRemoveRow(counter);
+	}
+
+
 }
 
 function onContactFolderChange(event) {
@@ -366,7 +411,7 @@ function onHTMLFocus(event) {
         else {
             // Search for signature starting from bottom
             node = children.getItem(children.count() - 1);
-            while (true) {
+            while (node != null) {
                 var x = node.getPrevious();
                 if (x == null) {
                     break;
@@ -378,6 +423,10 @@ function onHTMLFocus(event) {
                 node = x;
             }
         }
+	if (node == null)
+	{
+		return; //TODO: Why?! (turip)
+	}
 
         s.selectElement(node);
 
@@ -512,8 +561,162 @@ function initMailEditor() {
     
     Event.observe(window, "resize", onWindowResize);
     Event.observe(window, "beforeunload", onMailEditorClose);
-    
+
+    $("fromSelect").observe("change", function() { onFromChange(false); });
+
     onWindowResize.defer();
+}
+
+var oldFromIndex = 0; // As the array is sorted it will always contain the default identity first
+function onFromChange(reset)
+{
+	var newidx = $("fromSelect").value;
+	var id = userIdentities[newidx];
+	var oldId = undefined;
+	console.log("Form change trigger");
+
+	if (oldFromIndex !== undefined)
+	{
+		oldId = userIdentities[oldFromIndex];
+	}
+
+	if (oldId !== undefined)
+	{
+
+	    removeIdentityDestAddresses(oldId.bcc, "bcc");
+	    removeIdentityDestAddresses(oldId.cc, "cc");
+	    removeIdentityDestAddresses([oldId.replyTo], "replyTo");
+	}
+
+	oldFromIndex = newidx;
+
+	console.log("Change ", oldId, "=>", userIdentities[newidx]);
+
+	// Signature hacking
+
+	var composeMode = UserDefaults["SOGoMailComposeMessageType"];
+	// Regexp matches anything with a suffix of -- then nbsp or space times then <br/> \n \r
+	var sigRegexp = /^([\s\S]*)(--(&nbsp;| )*)(<br +\/>|\n|\r)([\s\S]*)$/m;
+	var html = (composeMode == "html");
+
+	var sig;
+	if (id.signature !== undefined)
+	{
+
+		sig = id.signature;
+		sig = "-- \n" + sig;
+	}
+	else
+	{
+		sig = "";
+	}
+
+	if (html)
+		sig = sig.replace("\n", "<br />");
+
+	var txt;
+
+	if (html)
+		txt =  CKEDITOR.instances.text.getData();
+	else
+		txt = $("text").value;
+
+	var match = txt.match(sigRegexp);
+	if (match != null)
+	{
+		txt = match[1];
+	}
+	txt=txt+sig;
+
+	if (html)
+		CKEDITOR.instances.text.setData(txt);
+	else
+		$("text").value = txt;
+
+	// Set BCC fields
+
+	addIdentityDestAddresses(id.bcc, "bcc");
+	addIdentityDestAddresses(id.cc, "cc");
+	addIdentityDestAddresses([id.replyTo], "replyTo"); 
+
+    // TODO: Implement logic that jumps to the first empty To field if such is present or focuses the text area
+}
+
+function parseMailAddress(addr)
+{
+	var mailNormal = /.+@.+\..+/;
+	var found = false;
+	var rv;
+
+	var mailre = /<.+@.+\..+>/;
+	var mail = mailre.exec(addr);
+	if (mail)
+	{
+		rv = {
+			mail: mail[0].substr(1,mail[0].length-2),
+			text: addr.replace(mailre, "").trim()
+		};
+		found = true;
+	}
+	else
+	{
+		if (mailNormal.exec(addr))
+		{
+			rv = {
+				mail: addr,
+				text: ""
+			};
+			found = true;
+		}
+	}
+
+	if (!found)
+	{
+		return undefined;
+	}
+
+	return rv;
+		
+}
+
+function removeIdentityDestAddresses(arr, type)
+{
+    if (arr !== undefined)
+    {
+    	for (var i = 0; i < arr.length; i++)
+	{
+		mparsed = parseMailAddress(arr[i]);
+		if (mparsed !== undefined)
+		{
+			removeContact(type, arr[i], undefined, 
+				mparsed.text,
+				mparsed.mail);
+		}
+	}
+    }
+
+}
+
+
+function addIdentityDestAddresses(arr, type)
+{
+    if (arr !== undefined)
+    {
+    	for (var i = 0; i < arr.length; i++)
+	{
+		mparsed = parseMailAddress(arr[i]);
+		if (mparsed !== undefined)
+		{
+			addContact(type, arr[i], undefined, 
+				mparsed.text,
+				mparsed.mail);
+		}
+
+			
+
+	}
+    }
+
 }
 
 function initializePriorityMenu() {

@@ -47,6 +47,8 @@
 
 - (BOOL) isWebAccessEnabled;
 - (BOOL) isCalendarDAVAccessEnabled;
+- (BOOL) extendedIdentities;
+
 - (BOOL) isAddressBookDAVAccessEnabled;
 
 - (BOOL) enableEMailAlarms;
@@ -84,6 +86,7 @@
 - (BOOL) SAML2LogoutEnabled;
 
 - (BOOL) enablePublicAccess;
+- (NSDictionary *) extendedLDAPIdentitySettings;
 
 @end
 

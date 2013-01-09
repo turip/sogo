@@ -44,6 +44,7 @@
   to="to"
   cc="cc"
   bcc="bcc"
+  replyTo="replyTo"
   />
 */
 
@@ -54,6 +55,7 @@
   NSArray *to;
   NSArray *cc;
   NSArray *bcc;
+  NSArray *replyTo;
   id      item;
   id      address;
   NSArray *addressList;
@@ -66,6 +68,8 @@
 - (NSArray *) cc;
 - (void) setBcc: (NSArray *) _bcc;
 - (NSArray *) bcc;
+- (void) setReplyTo: (NSArray *) _replyTo;
+- (NSArray *) replyTo;
 
 - (void) getAddressesFromFormValues: (NSDictionary *) _dict;
 - (NSString *) getIndexFromIdentifier: (NSString *) _identifier;
@@ -82,7 +86,7 @@ static NSArray *headers = nil;
   if (!didInit)
     {
       didInit = YES;
-      headers = [[NSArray alloc] initWithObjects: @"to", @"cc", @"bcc", nil];
+      headers = [[NSArray alloc] initWithObjects: @"to", @"cc", @"bcc", @"replyTo", nil];
     }
 }
 
@@ -99,6 +103,7 @@ static NSArray *headers = nil;
   [to          release];
   [cc          release];
   [bcc         release];
+  [replyTo     release];
   [item        release];
   [address     release];
   [addressList release];
@@ -166,6 +171,18 @@ static NSArray *headers = nil;
   return address;
 }
 
+- (void) setReplyTo: (NSArray *) _replyTo
+{
+  ASSIGN(replyTo,_replyTo);
+}
+
+- (NSArray *) replyTo
+{
+  return replyTo;
+}
+
+
+
 - (void) setItem: (id) _item
 {
   ASSIGN (item, _item);
@@ -211,6 +228,8 @@ static NSArray *headers = nil;
     return @"to";
   else if (addressList == cc)
     return @"cc";
+  else if (addressList == replyTo)
+    return @"replyTo";
 
   return @"bcc";
 }
@@ -264,7 +283,7 @@ static NSArray *headers = nil;
 
 - (void) getAddressesFromFormValues: (NSDictionary *) _dict
 {
-  NSMutableArray *rawTo, *rawCc, *rawBcc;
+  NSMutableArray *rawTo, *rawCc, *rawBcc, *rawReplyTo;
   NSString *idx, *popupKey, *popupValue;
   NSArray *keys;
   unsigned i, count;
@@ -273,6 +292,7 @@ static NSArray *headers = nil;
   rawTo  = [NSMutableArray arrayWithCapacity:4];
   rawCc  = [NSMutableArray arrayWithCapacity:4];
   rawBcc = [NSMutableArray arrayWithCapacity:2];
+  rawReplyTo = [NSMutableArray arrayWithCapacity:2];
   
   keys  = [_dict allKeys];
   count = [keys count];
@@ -291,6 +311,8 @@ static NSArray *headers = nil;
 	    [self _fillAddresses: rawTo withObject: addr];
 	  else if([popupValue isEqualToString:@"1"])
 	    [self _fillAddresses: rawCc withObject: addr];
+	  else if([popupValue isEqualToString:@"3"])
+	    [self _fillAddresses: rawReplyTo withObject: addr];
 	  else
 	    [self _fillAddresses: rawBcc withObject: addr];
 	}
@@ -299,6 +321,7 @@ static NSArray *headers = nil;
   [self setTo: rawTo];
   [self setCc: rawCc];
   [self setBcc: rawBcc];
+  [self setReplyTo: rawReplyTo];
 }
 
 - (NSString *) getIndexFromIdentifier: (NSString *) _identifier
@@ -330,7 +353,7 @@ static NSArray *headers = nil;
 
 - (int) addressCount
 {
-  return [to count] + [cc count] + [bcc count];
+  return [to count] + [cc count] + [bcc count] + [replyTo count];
 }
 
 @end /* UIxMailToSelection */

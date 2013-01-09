@@ -96,6 +96,10 @@
 
   /* ACL */
   NSArray *modifiers;
+
+  /* Extended identities */
+  NSDictionary * extIdOpts;
+
 }
 
 - (void) setBindDN: (NSString *) newBindDN

@@ -72,6 +72,7 @@
   NSArray  *to;
   NSArray  *cc;
   NSArray  *bcc;
+  NSArray  *replyTo;
   NSString *subject;
   NSString *sourceUID;
   NSString *sourceFolder;
@@ -133,6 +134,7 @@ static NSArray *infoKeys = nil;
   [to release];
   [cc release];
   [bcc release];
+  [replyTo release];
   [sourceUID release];
   [sourceFolder release];
   [attachmentName release];
@@ -151,6 +153,11 @@ static NSArray *infoKeys = nil;
 - (id) item
 {
   return item;
+}
+
+- (NSString *) userIdentities
+{
+      return [[[context activeUser] allIdentities] jsonRepresentation ];
 }
 
 - (NSArray *) priorityClasses
@@ -249,13 +256,24 @@ static NSArray *infoKeys = nil;
   return from;
 }
 
-- (NSString *) replyTo
+- (NSArray *) replyTo
 {
-  SOGoUserDefaults *ud;
+  NSString * rv;
 
-  ud = [[context activeUser] userDefaults];
+  if (!replyTo)
+  {
 
-  return [ud mailReplyTo];
+	  NSDictionary *identity;
+	  identity = [[context activeUser] primaryIdentity];
+	  rv = [identity objectForKey:@"replyTo"];
+	  if (rv != nil)
+	  {
+		  replyTo = [NSArray arrayWithObjects: rv, nil];
+		  [replyTo retain];
+		  return replyTo;
+	  }
+  }
+  return replyTo;
 }
 
 - (void) setSubject: (NSString *) newSubject
@@ -275,6 +293,17 @@ static NSArray *infoKeys = nil;
 
 - (NSString *) text
 {
+  NSString * rv;
+  if (!text)
+  {
+	  NSDictionary *identity;
+	  identity = [[context activeUser] primaryIdentity];
+	  rv = [identity objectForKey:@"signature"];
+	  if (rv != nil)
+	  {
+	  	text = [NSMutableString stringWithFormat: "-- \n%@", rv];
+	  }
+  }
   return text;
 }
 
@@ -311,6 +340,12 @@ static NSArray *infoKeys = nil;
 
 - (NSArray *) to
 {
+  if (to == nil)
+  {
+  	// This forces insertion of an empty to field
+  	to = [NSArray arrayWithObjects: @"", nil];
+	[to retain];
+  }
   return to;
 }
 
@@ -324,6 +359,20 @@ static NSArray *infoKeys = nil;
 
 - (NSArray *) cc
 {
+  NSArray * idCC;
+  NSDictionary *identity;
+  // Return the CC list from the default identity if none are set
+  if (cc == nil)
+  {
+    identity = [[context activeUser] primaryIdentity];
+    idCC = [identity objectForKey:@"cc"];
+    if (idCC != nil)
+    {
+      cc=idCC;
+      [cc retain];
+    }
+  }
+
   return cc;
 }
 
@@ -337,6 +386,21 @@ static NSArray *infoKeys = nil;
 
 - (NSArray *) bcc
 {
+  NSArray * idBCC;
+  NSDictionary *identity;
+  // Return the CC list from the default identity if none are set
+  if (bcc == nil)
+  {
+    identity = [[context activeUser] primaryIdentity];
+    idBCC = [identity objectForKey:@"bcc"];
+    if (idBCC != nil)
+    {
+      bcc = idBCC;
+      [bcc retain];
+    }
+  }
+
+
   return bcc;
 }
 

@@ -160,6 +160,7 @@ static Class NSStringK;
   [searchAttributes release];
   [domain release];
   [_dnCache release];
+  [extIdOpts release];
   [kindField release];
   [multipleBookingsField release];
   [MSExchangeHostname release];
@@ -200,6 +201,7 @@ static Class NSStringK;
            bindFields: [udSource objectForKey: @"bindFields"]
             kindField: [udSource objectForKey: @"KindFieldName"]
             andMultipleBookingsField: [udSource objectForKey: @"MultipleBookingsFieldName"]];
+	
 
       dotValue = [udSource objectForKey: @"listRequiresDot"];
       if (dotValue)
@@ -217,6 +219,11 @@ static Class NSStringK;
         }
       else
         dd = [SOGoSystemDefaults sharedSystemDefaults];
+
+	
+      extIdOpts = [dd extendedLDAPIdentitySettings];
+      if (extIdOpts)
+	      [extIdOpts retain]; 
 
       contactInfoAttribute
         = [udSource objectForKey: @"SOGoLDAPContactInfoAttribute"];
@@ -505,6 +512,153 @@ static Class NSStringK;
   userDN = [[entries nextObject] dn];
 
   return userDN;
+}
+
+/** EI means Extended Identity */
+- (NSString *) _EIMapField: (NSString *) field 
+{
+
+	return [extIdOpts objectForKey: field];
+}
+
+- (NSString *) _EIFormat: (NSString *) field forLogin: (NSString *)login
+{
+	NSString * tmp = [extIdOpts objectForKey: field];
+	NSMutableString * s = [NSMutableString stringWithString: tmp];
+	NSString * _domain = domain;
+
+	if (!_domain)
+		_domain = @"";
+
+	s = [[s stringByReplacingOccurrencesOfString: @"%U" withString: login ]
+		stringByReplacingOccurrencesOfString: @"%D" withString: _domain ];
+	
+	return s;
+}
+
+- (NSArray *) lookupExtIdentitiesFor: (NSString *) login
+{
+NSEnumerator *entries;
+  EOQualifier *qualifier;
+  NSArray *attributes;
+  NGLdapConnection *ldapConnection;
+  NGLdapEntry * ent;
+  NSMutableArray * rv = [NSMutableArray arrayWithCapacity: 10];
+
+  // TODO: make it configurable
+  NSString * myBaseDN = [self _EIFormat: @"baseDN" forLogin: login];
+
+
+  ldapConnection = [self _ldapConnection];
+  qualifier = [EOQualifier qualifierWithQualifierFormat: [ self _EIFormat: @"filter" forLogin: login ]];
+  attributes = [NSArray arrayWithObjects: 
+  			[self _EIMapField: @"identityCC"],
+			[self _EIMapField: @"identityBCC"],
+			[self _EIMapField: @"identityReplyTo"],
+			[self _EIMapField: @"identityFromAddress"],
+			[self _EIMapField: @"identityFromName"],
+			[self _EIMapField: @"identitySignature"],
+			[self _EIMapField: @"identityConfirmed"],
+			[self _EIMapField: @"identityWeight"],
+			nil
+  			];
+
+  NSLog(@"my query is running");
+  entries = [ldapConnection deepSearchAtBaseDN: myBaseDN
+                                       qualifier: qualifier
+                                      attributes: attributes];
+  NSLog(@"my query is done rv = %@", entries);
+
+  while ((ent = [entries nextObject]))
+  {
+  	NSMutableDictionary * identity = [NSMutableDictionary dictionary];
+	NGLdapAttribute * a;
+
+	a = [ent attributeWithName: [self _EIMapField:@"identityConfirmed"] ];
+	if (a)
+	{
+		NSArray * val = [a allValues];
+		if (![val objectAtIndex: 0])
+		{
+			continue;
+		}
+	}
+
+	a = [ent attributeWithName: [self _EIMapField:@"identityWeight"] ];
+	if (a)
+	{
+		[identity setValue: [a stringValueAtIndex: 0] forKey: @"weight"];
+	}
+	else
+	{
+		[identity setValue: @"-999" forKey: @"weight"];
+	}
+
+	a = [ent attributeWithName: [self _EIMapField:@"identityFromAddress"]];
+	if (a)
+		[identity setValue: [a stringValueAtIndex: 0]
+				    forKey: @"email" ];
+	else
+	{
+		NSLog(@"Identity does not contain identityFromAddress, ignoring it (user=%@,domain=%@,entry=%@)", 
+			login, domain, ent);
+		continue;
+	}
+	
+	a = [ent attributeWithName: [self _EIMapField:@"identityFromName"] ];
+	if (a)
+		[identity setValue: [a stringValueAtIndex: 0 ] forKey: @"fullName"];
+
+	a = [ent attributeWithName: [self _EIMapField: @"identityReplyTo"] ];
+	if (a)
+		[identity setValue: [a stringValueAtIndex: 0 ] forKey: @"replyTo"];
+
+	a = [ent attributeWithName: [self _EIMapField:@"identitySignature"] ];
+	if (a)
+		[identity setValue: [a stringValueAtIndex: 0 ] forKey: @"signature"];
+
+	a = [ent attributeWithName: [self _EIMapField:@"identityBCC"] ];
+	if (a)
+	{
+		NSMutableArray * tmp = [NSMutableArray arrayWithCapacity: 50];
+		int i;
+		for (i = 0; i < [a count]; i++)
+		{
+			[tmp addObject: [a stringValueAtIndex: i]];
+		}
+
+		[identity setValue: tmp forKey: @"bcc"];
+	}
+	a = [ent attributeWithName: [self _EIMapField:@"identityCC"] ];
+	if (a)
+	{
+		NSMutableArray * tmp = [NSMutableArray arrayWithCapacity: 50];
+		int i;
+		for (i = 0; i < [a count]; i++)
+		{
+			[tmp addObject: [a stringValueAtIndex: i]];
+		}
+
+		[identity setValue: tmp forKey: @"cc"];
+	}
+
+	[rv addObject: identity];	
+  }
+
+  if ([rv count] == 0)
+  {
+  	return nil;
+  }
+
+
+  // Let's sort the identities based on weights
+  NSSortDescriptor * mySortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"weight" ascending:YES];
+  NSArray * mySortDescriptors = [ NSArray arrayWithObjects: mySortDescriptor, nil ];
+  NSArray * finalValue = [rv sortedArrayUsingDescriptors:mySortDescriptors];
+
+  NSLog(@"Identity array for %@@%@ is %@", login, domain, finalValue);
+
+  return finalValue;
 }
 
 //
@@ -821,6 +975,8 @@ static Class NSStringK;
         [ids addObject: value];
     }
 
+  [attributes release];
+  [qs release];
   return ids;
 }
 

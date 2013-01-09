@@ -229,6 +229,12 @@ _injectConfigurationFromFile (NSUserDefaults *ud,
           | [super migrate]);
 }
 
+- (BOOL) extendedIdentities
+{
+  return [self boolForKey: @"SOGoMailExtendedIdentities"];
+}
+
+
 - (NSArray *) domainIds
 {
   return [[self dictionaryForKey: @"domains"] allKeys];
@@ -480,4 +486,8 @@ _injectConfigurationFromFile (NSUserDefaults *ud,
   return [self boolForKey: @"SOGoEnablePublicAccess"];
 }
 
+- (NSDictionary *) extendedLDAPIdentitySettings
+{
+  return [self dictionaryForKey: @"SOGoMailExtendedLDAPIdentitySettings"]; 
+}
 @end

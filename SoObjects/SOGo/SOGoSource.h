@@ -59,6 +59,7 @@
 - (NSDictionary *) lookupContactEntry: (NSString *) theID;
 - (NSDictionary *) lookupContactEntryWithUIDorEmail: (NSString *) entryID
                                            inDomain: (NSString *) domain;
+- (NSArray *) lookupExtIdentitiesFor: (NSString *) login;
 
 - (NSArray *) allEntryIDs;
 - (NSArray *) fetchContactsMatching: (NSString *) filter
