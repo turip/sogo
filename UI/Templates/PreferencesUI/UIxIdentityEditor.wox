@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE var:component>
+<var:component
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:var="http://www.skyrix.com/od/binding"
+  xmlns:const="http://www.skyrix.com/od/constant"
+  xmlns:uix="OGo:uix"
+  xmlns:rsrc="OGo:url"
+  xmlns:label="OGo:label"
+  className="UIxPageFrame"
+  title="title"
+  const:popup="YES"
+  const:cssFiles="datepicker.css"
+  const:jsFiles="RowEditionController.js,PasswordPolicy.js,ckeditor/ckeditor.js,datepicker.js"
+  >
+  <script type="text/javascript">
+    var localeCode = '<var:string value="localeCode"/>';
+  </script>
+  <form id="mainForm" var:href="ownPath">
+	<div class="tabsContainer" id="identitiesTabs">
+		<ul>
+			<li target="settingsView"><span>
+			<var:string label:value="Settings" /></span></li>
+			<li target="copiesView"><span><var:string
+			label:value="Copies and folders"/></span></li>
+		</ul>
+		<div class="tabs">
+			<div id="settingsView" class="tab">
+				<dl class="dl-horizontal">
+					    <dt><var:string label:value="Language :"/></dt>
+					<dd><var:string label:value="TODO"/></dd>
+				</dl>
+			</div>
+			<div id="copiesView" class="tab">
+				<dl class="dl-horizontal">
+					    <dt><var:string label:value="Language :"/></dt>
+					<dd><var:string label:value="TODO2"/></dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+  </form>
+</var:component>
