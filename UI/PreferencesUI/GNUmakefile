@@ -15,7 +15,8 @@ PreferencesUI_OBJC_FILES =		\
 	UIxPreferences.m		\
 	UIxFilterEditor.m		\
 	\
-	UIxAdditionalPreferences.m
+	UIxAdditionalPreferences.m	\
+	UIxIdentityEditor.m
 
 PreferencesUI_RESOURCE_FILES += \
 	product.plist	

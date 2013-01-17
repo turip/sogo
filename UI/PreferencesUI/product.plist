@@ -23,10 +23,6 @@
           protectedBy = "View";
           pageName = "UIxFilterEditor";
         };
-        identities = {
-          protectedBy = "View";
-          pageName = "UIxIdentities";
-        };
         jsonDefaults = {
           protectedBy = "View";
           actionClass = "UIxJSONPreferences";
@@ -37,7 +33,11 @@
           actionClass = "UIxJSONPreferences";
           actionName = "jsonSettings";
         };
+	identities = {
+	  protectedBy = "View";
+	  pageName = "UIxIdentityEditor";
+	};
       };
     };
-  };
+   };
 }

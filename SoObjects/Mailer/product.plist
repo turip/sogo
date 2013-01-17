@@ -29,6 +29,13 @@
         "WebDAV Access" = ( "Owner", "AuthorizedSubscriber" );
       };
     };
+
+    SOGoMailIdentity = {
+    	superclass	= "SOGoObject";
+	defaultRoles = {
+		"View"	= ( "Owner" );
+	};
+    };
 /*    SOGoSharedMailAccount = {
       superclass    = "SOGoMailAccount";
     }; */
