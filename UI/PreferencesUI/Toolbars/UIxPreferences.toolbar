@@ -3,7 +3,7 @@
       label = "Save and Close";
       onclick = "return savePreferences(event);";
       image = "tb-compose-save-flat-24x24.png"; },
-    { link = "#";
+    { link = "preferences";
       isSafe = NO;
       label = "Close";
       onclick = "return onCloseButtonClick();";

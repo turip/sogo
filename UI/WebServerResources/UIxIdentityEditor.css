@@ -1,8 +1,31 @@
-DIV#identitiesTabs
+div.identitiesContainer
 { position: absolute;
   top: 54px;
   left: 5px;
   right: 5px;
-  bottom: 5px; }
+  bottom: 5px;
+  }
 
+div.idListPanel
+{
+    background-color: #CCDDEC;
+    border: 1px;
+    border-style: inset;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 200px;
+    bottom: 5px;
+    }
 
+div.activeIdPanel
+{
+    background-color: white;
+    border: 1px;
+    border-style: inset;
+    position:absolute;
+    top: 5px;
+    left: 210px;
+    right: 5px;
+    bottom: 5px;
+    }

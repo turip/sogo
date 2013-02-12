@@ -31,7 +31,7 @@
 
 
 - (id)defaultAction {
-	NSLog(@"@Defaultaction invoked");
+	NSLog(@"@DefaultAction invoked");
 	return self;
 }
 @end

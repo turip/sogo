@@ -33,11 +33,7 @@
           actionClass = "UIxJSONPreferences";
           actionName = "jsonSettings";
         };
-	identities = {
-	  protectedBy = "View";
-	  pageName = "UIxIdentityEditor";
-	};
-      };
+	  };
     };
    };
 }

@@ -365,6 +365,37 @@
       };
     };
 
+    SOGoMailIdentities = {
+        slots = {
+            toolbar = {
+                protectedBy = "View";
+                value = "SOGoMailIdentity.toolbar";
+            };
+        };
+        methods = {
+            view = {
+    	        protectedBy = "View";
+        	    pageName = "UIxIdentityEditor";
+    	    };
+        };
+    };
+
+    SOGoMailIdentity = {
+        slots = {
+            toolbar = {
+                protectedBy = "View";
+                value = "SOGoMailIdentity.toolbar";
+            };
+        };
+        methods = {
+            view = {
+    	        protectedBy = "View";
+        	    pageName = "UIxIdentityEditor";
+    	    };
+        };
+   
+    };
+
     SOGoMailAccount = {
       slots = {
         toolbar = {

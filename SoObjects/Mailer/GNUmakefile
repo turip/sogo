@@ -33,6 +33,8 @@ Mailer_OBJC_FILES += \
 	SOGoMailForward.m		\
 	SOGoMailReply.m			\
 	SOGoMailIdentity.m		\
+	SOGoMailIdentities.m		\
+	EmailAddress.m			\
 	\
 	EOQualifier+MailDAV.m		\
 	NSData+Mail.m			\
